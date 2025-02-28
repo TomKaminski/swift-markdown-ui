@@ -1,6 +1,6 @@
-import Foundation
 @_implementationOnly import cmark_gfm
 @_implementationOnly import cmark_gfm_extensions
+import Foundation
 
 extension Array where Element == BlockNode {
   init(markdown: String) {
@@ -29,8 +29,8 @@ extension Array where Element == BlockNode {
   }
 }
 
-extension BlockNode {
-  fileprivate init?(unsafeNode: UnsafeNode) {
+private extension BlockNode {
+  init?(unsafeNode: UnsafeNode) {
     switch unsafeNode.nodeType {
     case .blockquote:
       self = .blockquote(children: unsafeNode.children.compactMap(BlockNode.init(unsafeNode:)))
@@ -82,8 +82,8 @@ extension BlockNode {
   }
 }
 
-extension RawListItem {
-  fileprivate init(unsafeNode: UnsafeNode) {
+private extension RawListItem {
+  init(unsafeNode: UnsafeNode) {
     guard unsafeNode.nodeType == .item else {
       fatalError("Expected a list item but got a '\(unsafeNode.nodeType)' instead.")
     }
@@ -91,8 +91,8 @@ extension RawListItem {
   }
 }
 
-extension RawTaskListItem {
-  fileprivate init(unsafeNode: UnsafeNode) {
+private extension RawTaskListItem {
+  init(unsafeNode: UnsafeNode) {
     guard unsafeNode.nodeType == .taskListItem || unsafeNode.nodeType == .item else {
       fatalError("Expected a list item but got a '\(unsafeNode.nodeType)' instead.")
     }
@@ -103,8 +103,8 @@ extension RawTaskListItem {
   }
 }
 
-extension RawTableRow {
-  fileprivate init(unsafeNode: UnsafeNode) {
+private extension RawTableRow {
+  init(unsafeNode: UnsafeNode) {
     guard unsafeNode.nodeType == .tableRow || unsafeNode.nodeType == .tableHead else {
       fatalError("Expected a table row but got a '\(unsafeNode.nodeType)' instead.")
     }
@@ -112,8 +112,8 @@ extension RawTableRow {
   }
 }
 
-extension RawTableCell {
-  fileprivate init(unsafeNode: UnsafeNode) {
+private extension RawTableCell {
+  init(unsafeNode: UnsafeNode) {
     guard unsafeNode.nodeType == .tableCell else {
       fatalError("Expected a table cell but got a '\(unsafeNode.nodeType)' instead.")
     }
@@ -121,8 +121,8 @@ extension RawTableCell {
   }
 }
 
-extension InlineNode {
-  fileprivate init?(unsafeNode: UnsafeNode) {
+private extension InlineNode {
+  init?(unsafeNode: UnsafeNode) {
     switch unsafeNode.nodeType {
     case .text:
       self = .text(unsafeNode.literal ?? "")
@@ -140,6 +140,15 @@ extension InlineNode {
       self = .strong(children: unsafeNode.children.compactMap(InlineNode.init(unsafeNode:)))
     case .strikethrough:
       self = .strikethrough(children: unsafeNode.children.compactMap(InlineNode.init(unsafeNode:)))
+    case .highlight:
+      // TODO: Implement
+      return nil
+    case .superscript:
+      // TODO: Implement
+      return nil
+    case .subscript:
+      // TODO: Implement
+      return nil
     case .link:
       self = .link(
         destination: unsafeNode.url ?? "",
@@ -159,8 +168,8 @@ extension InlineNode {
 
 private typealias UnsafeNode = UnsafeMutablePointer<cmark_node>
 
-extension UnsafeNode {
-  fileprivate var nodeType: NodeType {
+private extension UnsafeNode {
+  var nodeType: NodeType {
     let typeString = String(cString: cmark_node_get_type_string(self))
     guard let nodeType = NodeType(rawValue: typeString) else {
       fatalError("Unknown node type '\(typeString)' found.")
@@ -168,52 +177,52 @@ extension UnsafeNode {
     return nodeType
   }
 
-  fileprivate var children: UnsafeNodeSequence {
+  var children: UnsafeNodeSequence {
     .init(cmark_node_first_child(self))
   }
 
-  fileprivate var literal: String? {
+  var literal: String? {
     cmark_node_get_literal(self).map(String.init(cString:))
   }
 
-  fileprivate var url: String? {
+  var url: String? {
     cmark_node_get_url(self).map(String.init(cString:))
   }
 
-  fileprivate var isTaskListItem: Bool {
+  var isTaskListItem: Bool {
     self.nodeType == .taskListItem
   }
 
-  fileprivate var listType: cmark_list_type {
+  var listType: cmark_list_type {
     cmark_node_get_list_type(self)
   }
 
-  fileprivate var listStart: Int {
+  var listStart: Int {
     Int(cmark_node_get_list_start(self))
   }
 
-  fileprivate var isTaskListItemChecked: Bool {
+  var isTaskListItemChecked: Bool {
     cmark_gfm_extensions_get_tasklist_item_checked(self)
   }
 
-  fileprivate var isTightList: Bool {
+  var isTightList: Bool {
     cmark_node_get_list_tight(self) != 0
   }
 
-  fileprivate var fenceInfo: String? {
+  var fenceInfo: String? {
     cmark_node_get_fence_info(self).map(String.init(cString:))
   }
 
-  fileprivate var headingLevel: Int {
+  var headingLevel: Int {
     Int(cmark_node_get_heading_level(self))
   }
 
-  fileprivate var tableColumns: Int {
+  var tableColumns: Int {
     Int(cmark_gfm_extensions_get_table_columns(self))
   }
 
-  fileprivate var tableAlignments: [RawTableColumnAlignment] {
-    (0..<self.tableColumns).map { column in
+  var tableAlignments: [RawTableColumnAlignment] {
+    (0 ..< self.tableColumns).map { column in
       let ascii = cmark_gfm_extensions_get_table_alignments(self)[column]
       let scalar = UnicodeScalar(ascii)
       let character = Character(scalar)
@@ -221,7 +230,7 @@ extension UnsafeNode {
     }
   }
 
-  fileprivate static func parseMarkdown<ResultType>(
+  static func parseMarkdown<ResultType>(
     _ markdown: String,
     body: (UnsafeNode) throws -> ResultType
   ) rethrows -> ResultType? {
@@ -235,9 +244,9 @@ extension UnsafeNode {
     let extensionNames: Set<String>
 
     if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
-      extensionNames = ["autolink", "strikethrough", "tagfilter", "tasklist", "table"]
+      extensionNames = ["autolink", "subscriptstrikethrough", "tagfilter", "tasklist", "table", "highlight", "superscript"]
     } else {
-      extensionNames = ["autolink", "strikethrough", "tagfilter", "tasklist"]
+      extensionNames = ["autolink", "subscriptstrikethrough", "tagfilter", "tasklist"]
     }
 
     for extensionName in extensionNames {
@@ -259,7 +268,7 @@ extension UnsafeNode {
     return try body(document)
   }
 
-  fileprivate static func makeDocument<ResultType>(
+  static func makeDocument<ResultType>(
     _ blocks: [BlockNode],
     body: (UnsafeNode) throws -> ResultType
   ) rethrows -> ResultType? {
@@ -271,7 +280,7 @@ extension UnsafeNode {
     return try body(document)
   }
 
-  fileprivate static func make(_ block: BlockNode) -> UnsafeNode? {
+  static func make(_ block: BlockNode) -> UnsafeNode? {
     switch block {
     case .blockquote(let children):
       guard let node = cmark_node_new(CMARK_NODE_BLOCK_QUOTE) else { return nil }
@@ -318,7 +327,7 @@ extension UnsafeNode {
       return node
     case .table(let columnAlignments, let rows):
       guard let table = cmark_find_syntax_extension("table"),
-        let node = cmark_node_new_with_ext(ExtensionNodeTypes.shared.CMARK_NODE_TABLE, table)
+            let node = cmark_node_new_with_ext(ExtensionNodeTypes.shared.CMARK_NODE_TABLE, table)
       else {
         return nil
       }
@@ -336,15 +345,15 @@ extension UnsafeNode {
     }
   }
 
-  fileprivate static func make(_ item: RawListItem) -> UnsafeNode? {
+  static func make(_ item: RawListItem) -> UnsafeNode? {
     guard let node = cmark_node_new(CMARK_NODE_ITEM) else { return nil }
     item.children.compactMap(UnsafeNode.make).forEach { cmark_node_append_child(node, $0) }
     return node
   }
 
-  fileprivate static func make(_ item: RawTaskListItem) -> UnsafeNode? {
+  static func make(_ item: RawTaskListItem) -> UnsafeNode? {
     guard let tasklist = cmark_find_syntax_extension("tasklist"),
-      let node = cmark_node_new_with_ext(CMARK_NODE_ITEM, tasklist)
+          let node = cmark_node_new_with_ext(CMARK_NODE_ITEM, tasklist)
     else {
       return nil
     }
@@ -353,9 +362,9 @@ extension UnsafeNode {
     return node
   }
 
-  fileprivate static func make(_ tableRow: RawTableRow) -> UnsafeNode? {
+  static func make(_ tableRow: RawTableRow) -> UnsafeNode? {
     guard let table = cmark_find_syntax_extension("table"),
-      let node = cmark_node_new_with_ext(ExtensionNodeTypes.shared.CMARK_NODE_TABLE_ROW, table)
+          let node = cmark_node_new_with_ext(ExtensionNodeTypes.shared.CMARK_NODE_TABLE_ROW, table)
     else {
       return nil
     }
@@ -363,9 +372,9 @@ extension UnsafeNode {
     return node
   }
 
-  fileprivate static func make(_ tableCell: RawTableCell) -> UnsafeNode? {
+  static func make(_ tableCell: RawTableCell) -> UnsafeNode? {
     guard let table = cmark_find_syntax_extension("table"),
-      let node = cmark_node_new_with_ext(ExtensionNodeTypes.shared.CMARK_NODE_TABLE_CELL, table)
+          let node = cmark_node_new_with_ext(ExtensionNodeTypes.shared.CMARK_NODE_TABLE_CELL, table)
     else {
       return nil
     }
@@ -373,7 +382,7 @@ extension UnsafeNode {
     return node
   }
 
-  fileprivate static func make(_ inline: InlineNode) -> UnsafeNode? {
+  static func make(_ inline: InlineNode) -> UnsafeNode? {
     switch inline {
     case .text(let content):
       guard let node = cmark_node_new(CMARK_NODE_TEXT) else { return nil }
@@ -400,13 +409,50 @@ extension UnsafeNode {
       children.compactMap(UnsafeNode.make).forEach { cmark_node_append_child(node, $0) }
       return node
     case .strikethrough(let children):
-      guard let strikethrough = cmark_find_syntax_extension("strikethrough"),
-        let node = cmark_node_new_with_ext(
-          ExtensionNodeTypes.shared.CMARK_NODE_STRIKETHROUGH, strikethrough)
+      // TODO: Decide here
+      guard let subscriptstrikethrough = cmark_find_syntax_extension("subscriptstrikethrough"),
+            let node = cmark_node_new_with_ext(
+              ExtensionNodeTypes.shared.CMARK_NODE_SUBSCRIPTSTRIKETHROUGH, subscriptstrikethrough
+            )
       else {
         return nil
       }
+
       children.compactMap(UnsafeNode.make).forEach { cmark_node_append_child(node, $0) }
+      return node
+    case .subscript(let content):
+      // TODO: Decide here
+      guard let subscriptstrikethrough = cmark_find_syntax_extension("subscriptstrikethrough"),
+            let node = cmark_node_new_with_ext(
+              ExtensionNodeTypes.shared.CMARK_NODE_SUBSCRIPTSTRIKETHROUGH, subscriptstrikethrough
+            )
+      else {
+        return nil
+      }
+
+      cmark_node_set_literal(node, content)
+      return node
+    case .highlight(let children):
+      guard let highlight = cmark_find_syntax_extension("highlight"),
+            let node = cmark_node_new_with_ext(
+              ExtensionNodeTypes.shared.CMARK_NODE_HIGHLIGHT, highlight
+            )
+      else {
+        return nil
+      }
+
+      children.compactMap(UnsafeNode.make).forEach { cmark_node_append_child(node, $0) }
+      return node
+    case .superscript(let content):
+      guard let superscript = cmark_find_syntax_extension("superscript"),
+            let node = cmark_node_new_with_ext(
+              ExtensionNodeTypes.shared.CMARK_NODE_SUPERSCRIPT, superscript
+            )
+      else {
+        return nil
+      }
+
+      cmark_node_set_literal(node, content)
       return node
     case .link(let destination, let children):
       guard let node = cmark_node_new(CMARK_NODE_LINK) else { return nil }
@@ -449,6 +495,9 @@ private enum NodeType: String {
 
   // Extensions
 
+  case superscript
+  case `subscript`
+  case highlight
   case strikethrough
   case table
   case tableHead = "table_header"
@@ -489,7 +538,9 @@ private struct ExtensionNodeTypes {
   let CMARK_NODE_TABLE: cmark_node_type
   let CMARK_NODE_TABLE_ROW: cmark_node_type
   let CMARK_NODE_TABLE_CELL: cmark_node_type
-  let CMARK_NODE_STRIKETHROUGH: cmark_node_type
+  let CMARK_NODE_SUBSCRIPTSTRIKETHROUGH: cmark_node_type
+  let CMARK_NODE_SUPERSCRIPT: cmark_node_type
+  let CMARK_NODE_HIGHLIGHT: cmark_node_type
 
   static let shared = ExtensionNodeTypes()
 
@@ -507,9 +558,12 @@ private struct ExtensionNodeTypes {
     self.CMARK_NODE_TABLE_ROW = findNodeType("CMARK_NODE_TABLE_ROW", in: handle) ?? CMARK_NODE_NONE
     self.CMARK_NODE_TABLE_CELL =
       findNodeType("CMARK_NODE_TABLE_CELL", in: handle) ?? CMARK_NODE_NONE
-    self.CMARK_NODE_STRIKETHROUGH =
-      findNodeType("CMARK_NODE_STRIKETHROUGH", in: handle) ?? CMARK_NODE_NONE
-
+    self.CMARK_NODE_SUBSCRIPTSTRIKETHROUGH =
+      findNodeType("CMARK_NODE_SUBSCRIPTSTRIKETHROUGH", in: handle) ?? CMARK_NODE_NONE
+    self.CMARK_NODE_SUPERSCRIPT =
+      findNodeType("CMARK_NODE_SUPERSCRIPT", in: handle) ?? CMARK_NODE_NONE
+    self.CMARK_NODE_HIGHLIGHT =
+      findNodeType("CMARK_NODE_HIGHLIGHT", in: handle) ?? CMARK_NODE_NONE
     dlclose(handle)
   }
 }

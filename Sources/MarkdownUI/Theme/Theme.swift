@@ -118,6 +118,16 @@ public struct Theme: Sendable {
   /// The link style.
   public var link: TextStyle = EmptyTextStyle()
 
+  public var superscriptText: TextStyle = EmptyTextStyle()
+  public var subscriptText: TextStyle = EmptyTextStyle()
+
+  /// The superscript style.
+  public var superscript = BlockStyle<BlockConfiguration> { $0.label }
+
+  public var `subscript` = BlockStyle<BlockConfiguration> { $0.label }
+
+  public var highlight: TextStyle = BackgroundColor(.yellow)
+
   var headings = Array(
     repeating: BlockStyle<BlockConfiguration> { $0.label },
     count: 6
@@ -199,10 +209,10 @@ public struct Theme: Sendable {
   public init() {}
 }
 
-extension Theme {
+public extension Theme {
   /// Adds a default text style to the theme.
   /// - Parameter text: A text style builder that returns the default text style.
-  public func text<S: TextStyle>(@TextStyleBuilder text: () -> S) -> Theme {
+  func text<S: TextStyle>(@TextStyleBuilder text: () -> S) -> Theme {
     var theme = self
     theme.text = text()
     return theme
@@ -210,7 +220,7 @@ extension Theme {
 
   /// Adds an inline code style to the theme.
   /// - Parameter code: A text style builder that returns the inline code style.
-  public func code<S: TextStyle>(@TextStyleBuilder code: () -> S) -> Theme {
+  func code<S: TextStyle>(@TextStyleBuilder code: () -> S) -> Theme {
     var theme = self
     theme.code = code()
     return theme
@@ -218,7 +228,7 @@ extension Theme {
 
   /// Adds an emphasis style to the theme.
   /// - Parameter emphasis: A text style builder that returns the emphasis style.
-  public func emphasis<S: TextStyle>(@TextStyleBuilder emphasis: () -> S) -> Theme {
+  func emphasis<S: TextStyle>(@TextStyleBuilder emphasis: () -> S) -> Theme {
     var theme = self
     theme.emphasis = emphasis()
     return theme
@@ -226,7 +236,7 @@ extension Theme {
 
   /// Adds a strong style to the theme.
   /// - Parameter strong: A text style builder that returns the strong style.
-  public func strong<S: TextStyle>(@TextStyleBuilder strong: () -> S) -> Theme {
+  func strong<S: TextStyle>(@TextStyleBuilder strong: () -> S) -> Theme {
     var theme = self
     theme.strong = strong()
     return theme
@@ -234,7 +244,7 @@ extension Theme {
 
   /// Adds a strikethrough style to the theme.
   /// - Parameter strikethrough: A text style builder that returns the strikethrough style.
-  public func strikethrough<S: TextStyle>(@TextStyleBuilder strikethrough: () -> S) -> Theme {
+  func strikethrough<S: TextStyle>(@TextStyleBuilder strikethrough: () -> S) -> Theme {
     var theme = self
     theme.strikethrough = strikethrough()
     return theme
@@ -242,17 +252,17 @@ extension Theme {
 
   /// Adds a link style to the theme.
   /// - Parameter link: A text style builder that returns the link style.
-  public func link<S: TextStyle>(@TextStyleBuilder link: () -> S) -> Theme {
+  func link<S: TextStyle>(@TextStyleBuilder link: () -> S) -> Theme {
     var theme = self
     theme.link = link()
     return theme
   }
 }
 
-extension Theme {
+public extension Theme {
   /// Adds a level 1 heading style to the theme.
   /// - Parameter body: A view builder that returns a customized level 1 heading.
-  public func heading1<Body: View>(
+  func heading1<Body: View>(
     @ViewBuilder body: @escaping (_ configuration: BlockConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -262,7 +272,7 @@ extension Theme {
 
   /// Adds a level 2 heading style to the theme.
   /// - Parameter body: A view builder that returns a customized level 2 heading.
-  public func heading2<Body: View>(
+  func heading2<Body: View>(
     @ViewBuilder body: @escaping (_ label: BlockConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -272,7 +282,7 @@ extension Theme {
 
   /// Adds a level 3 heading style to the theme.
   /// - Parameter body: A view builder that returns a customized level 3 heading.
-  public func heading3<Body: View>(
+  func heading3<Body: View>(
     @ViewBuilder body: @escaping (_ label: BlockConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -282,7 +292,7 @@ extension Theme {
 
   /// Adds a level 4 heading style to the theme.
   /// - Parameter body: A view builder that returns a customized level 4 heading.
-  public func heading4<Body: View>(
+  func heading4<Body: View>(
     @ViewBuilder body: @escaping (_ label: BlockConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -292,7 +302,7 @@ extension Theme {
 
   /// Adds a level 5 heading style to the theme.
   /// - Parameter body: A view builder that returns a customized level 5 heading.
-  public func heading5<Body: View>(
+  func heading5<Body: View>(
     @ViewBuilder body: @escaping (_ label: BlockConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -302,7 +312,7 @@ extension Theme {
 
   /// Adds a level 6 heading style to the theme.
   /// - Parameter body: A view builder that returns a customized level 6 heading.
-  public func heading6<Body: View>(
+  func heading6<Body: View>(
     @ViewBuilder body: @escaping (_ label: BlockConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -312,7 +322,7 @@ extension Theme {
 
   /// Adds a paragraph style to the theme.
   /// - Parameter body: A view builder that returns a customized paragraph.
-  public func paragraph<Body: View>(
+  func paragraph<Body: View>(
     @ViewBuilder body: @escaping (_ label: BlockConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -322,7 +332,7 @@ extension Theme {
 
   /// Adds a blockquote style to the theme.
   /// - Parameter body: A view builder that returns a customized blockquote.
-  public func blockquote<Body: View>(
+  func blockquote<Body: View>(
     @ViewBuilder body: @escaping (_ label: BlockConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -332,7 +342,7 @@ extension Theme {
 
   /// Adds a code block style to the theme.
   /// - Parameter body: A view builder that returns a customized code block.
-  public func codeBlock<Body: View>(
+  func codeBlock<Body: View>(
     @ViewBuilder body: @escaping (_ configuration: CodeBlockConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -342,7 +352,7 @@ extension Theme {
 
   /// Adds an image style to the theme.
   /// - Parameter body: A view builder that returns a customized image.
-  public func image<Body: View>(
+  func image<Body: View>(
     @ViewBuilder body: @escaping (_ label: BlockConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -352,7 +362,7 @@ extension Theme {
 
   /// Adds a list style to the theme.
   /// - Parameter body: A view builder that returns a customized list.
-  public func list<Body: View>(
+  func list<Body: View>(
     @ViewBuilder body: @escaping (_ label: BlockConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -362,7 +372,7 @@ extension Theme {
 
   /// Adds a list item style to the theme.
   /// - Parameter body: A view builder that returns a customized list item.
-  public func listItem<Body: View>(
+  func listItem<Body: View>(
     @ViewBuilder body: @escaping (_ label: BlockConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -372,7 +382,7 @@ extension Theme {
 
   /// Adds a task list marker style to the theme.
   /// - Parameter body: A view builder that returns a customized task list marker.
-  public func taskListMarker(_ taskListMarker: BlockStyle<TaskListMarkerConfiguration>) -> Theme {
+  func taskListMarker(_ taskListMarker: BlockStyle<TaskListMarkerConfiguration>) -> Theme {
     var theme = self
     theme.taskListMarker = taskListMarker
     return theme
@@ -380,7 +390,7 @@ extension Theme {
 
   /// Adds a task list marker style to the theme.
   /// - Parameter body: A view builder that returns a customized task list marker.
-  public func taskListMarker<Body: View>(
+  func taskListMarker<Body: View>(
     @ViewBuilder body: @escaping (_ configuration: TaskListMarkerConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -390,7 +400,7 @@ extension Theme {
 
   /// Adds a bulleted list marker style to the theme.
   /// - Parameter body: A view builder that returns a customized bulleted list marker.
-  public func bulletedListMarker(
+  func bulletedListMarker(
     _ bulletedListMarker: BlockStyle<ListMarkerConfiguration>
   ) -> Theme {
     var theme = self
@@ -400,7 +410,7 @@ extension Theme {
 
   /// Adds a bulleted list marker style to the theme.
   /// - Parameter body: A view builder that returns a customized bulleted list marker.
-  public func bulletedListMarker<Body: View>(
+  func bulletedListMarker<Body: View>(
     @ViewBuilder body: @escaping (_ configuration: ListMarkerConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -410,7 +420,7 @@ extension Theme {
 
   /// Adds a numbered list marker style to the theme.
   /// - Parameter body: A view builder that returns a customized numbered list marker.
-  public func numberedListMarker(
+  func numberedListMarker(
     _ numberedListMarker: BlockStyle<ListMarkerConfiguration>
   ) -> Theme {
     var theme = self
@@ -420,7 +430,7 @@ extension Theme {
 
   /// Adds a numbered list marker style to the theme.
   /// - Parameter body: A view builder that returns a customized numbered list marker.
-  public func numberedListMarker<Body: View>(
+  func numberedListMarker<Body: View>(
     @ViewBuilder body: @escaping (_ configuration: ListMarkerConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -430,7 +440,7 @@ extension Theme {
 
   /// Adds a table style to the theme.
   /// - Parameter body: A view builder that returns a customized table.
-  public func table<Body: View>(
+  func table<Body: View>(
     @ViewBuilder body: @escaping (_ label: BlockConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -440,7 +450,7 @@ extension Theme {
 
   /// Adds a table cell style to the theme.
   /// - Parameter body: A view builder that returns a customized table cell.
-  public func tableCell<Body: View>(
+  func tableCell<Body: View>(
     @ViewBuilder body: @escaping (_ configuration: TableCellConfiguration) -> Body
   ) -> Theme {
     var theme = self
@@ -450,16 +460,16 @@ extension Theme {
 
   /// Adds a thematic break style to the theme.
   /// - Parameter body: A view builder that returns a customized thematic break.
-  public func thematicBreak<Body: View>(@ViewBuilder body: @escaping () -> Body) -> Theme {
+  func thematicBreak<Body: View>(@ViewBuilder body: @escaping () -> Body) -> Theme {
     var theme = self
     theme.thematicBreak = .init(body: body)
     return theme
   }
 }
 
-extension Theme {
+public extension Theme {
   /// The text background color of the theme extracted from the ``Theme/text`` style.
-  public var textBackgroundColor: Color? {
+  var textBackgroundColor: Color? {
     var attributes = AttributeContainer()
     self.text._collectAttributes(in: &attributes)
     return attributes.backgroundColor

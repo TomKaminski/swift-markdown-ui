@@ -57,6 +57,12 @@ private struct AttributedStringInlineRenderer {
       self.renderStrong(children: children)
     case .strikethrough(let children):
       self.renderStrikethrough(children: children)
+    case .superscript(let content):
+      self.renderSuperscript(content)
+    case .subscript(let content):
+      self.renderSubscript(content)
+    case .highlight(let children):
+      self.renderHighlight(children: children)
     case .link(let destination, let children):
       self.renderLink(destination: destination, children: children)
     case .image(let source, let children):
@@ -76,7 +82,7 @@ private struct AttributedStringInlineRenderer {
   }
 
   private mutating func renderSoftBreak() {
-    switch softBreakMode {
+    switch self.softBreakMode {
     case .space where self.shouldSkipNextWhitespace:
       self.shouldSkipNextWhitespace = false
     case .space:
@@ -139,6 +145,25 @@ private struct AttributedStringInlineRenderer {
     self.attributes = savedAttributes
   }
 
+  private mutating func renderSubscript(_ text: String) {
+    self.result += .init(text, attributes: self.textStyles.subscript.mergingAttributes(self.attributes))
+  }
+
+  private mutating func renderHighlight(children: [InlineNode]) {
+    let savedAttributes = self.attributes
+    self.attributes = self.textStyles.highlight.mergingAttributes(self.attributes)
+
+    for child in children {
+      self.render(child)
+    }
+
+    self.attributes = savedAttributes
+  }
+
+  private mutating func renderSuperscript(_ text: String) {
+    self.result += .init(text, attributes: self.textStyles.superscript.mergingAttributes(self.attributes))
+  }
+
   private mutating func renderLink(destination: String, children: [InlineNode]) {
     let savedAttributes = self.attributes
     self.attributes = self.textStyles.link.mergingAttributes(self.attributes)
@@ -156,8 +181,8 @@ private struct AttributedStringInlineRenderer {
   }
 }
 
-extension TextStyle {
-  fileprivate func mergingAttributes(_ attributes: AttributeContainer) -> AttributeContainer {
+private extension TextStyle {
+  func mergingAttributes(_ attributes: AttributeContainer) -> AttributeContainer {
     var newAttributes = attributes
     self._collectAttributes(in: &newAttributes)
     return newAttributes

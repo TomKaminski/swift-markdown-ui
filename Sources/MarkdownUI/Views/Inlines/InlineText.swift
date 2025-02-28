@@ -24,7 +24,10 @@ struct InlineText: View {
           emphasis: self.theme.emphasis,
           strong: self.theme.strong,
           strikethrough: self.theme.strikethrough,
-          link: self.theme.link
+          link: self.theme.link,
+          subscript: self.theme.subscriptText,
+          superscript: self.theme.subscriptText,
+          highlight: self.theme.highlight
         ),
         images: self.inlineImages,
         softBreakMode: self.softBreakMode,
@@ -47,7 +50,7 @@ struct InlineText: View {
         }
 
         taskGroup.addTask {
-          (image.source, try await self.inlineImageProvider.image(with: url, label: image.alt))
+          try (image.source, await self.inlineImageProvider.image(with: url, label: image.alt))
         }
       }
 

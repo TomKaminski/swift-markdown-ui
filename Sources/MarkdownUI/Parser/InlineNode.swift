@@ -9,6 +9,9 @@ enum InlineNode: Hashable, Sendable {
   case emphasis(children: [InlineNode])
   case strong(children: [InlineNode])
   case strikethrough(children: [InlineNode])
+  case `subscript`(String)
+  case highlight(children: [InlineNode])
+  case superscript(String)
   case link(destination: String, children: [InlineNode])
   case image(source: String, children: [InlineNode])
 }
