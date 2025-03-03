@@ -26,7 +26,7 @@ struct InlineText: View {
           strikethrough: self.theme.strikethrough,
           link: self.theme.link,
           subscript: self.theme.subscriptText,
-          superscript: self.theme.subscriptText,
+          superscript: self.theme.superscriptText,
           highlight: self.theme.highlight
         ),
         images: self.inlineImages,

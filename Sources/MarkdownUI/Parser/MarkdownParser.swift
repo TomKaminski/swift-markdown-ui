@@ -141,14 +141,11 @@ private extension InlineNode {
     case .strikethrough:
       self = .strikethrough(children: unsafeNode.children.compactMap(InlineNode.init(unsafeNode:)))
     case .highlight:
-      // TODO: Implement
-      return nil
+      self = .highlight(children: unsafeNode.children.compactMap(InlineNode.init(unsafeNode:)))
     case .superscript:
-      // TODO: Implement
-      return nil
+      self = .superscript(children: unsafeNode.children.compactMap(InlineNode.init(unsafeNode:)))
     case .subscript:
-      // TODO: Implement
-      return nil
+      self = .subscript(children: unsafeNode.children.compactMap(InlineNode.init(unsafeNode:)))
     case .link:
       self = .link(
         destination: unsafeNode.url ?? "",
@@ -244,9 +241,9 @@ private extension UnsafeNode {
     let extensionNames: Set<String>
 
     if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
-      extensionNames = ["autolink", "subscriptstrikethrough", "tagfilter", "tasklist", "table", "highlight", "superscript"]
+      extensionNames = ["autolink", "subscript", "tagfilter", "tasklist", "table", "highlight", "superscript", "strikethrough"]
     } else {
-      extensionNames = ["autolink", "subscriptstrikethrough", "tagfilter", "tasklist"]
+      extensionNames = ["autolink", "subscript", "strikethrough", "superscript", "tagfilter", "tasklist"]
     }
 
     for extensionName in extensionNames {
@@ -409,10 +406,9 @@ private extension UnsafeNode {
       children.compactMap(UnsafeNode.make).forEach { cmark_node_append_child(node, $0) }
       return node
     case .strikethrough(let children):
-      // TODO: Decide here
-      guard let subscriptstrikethrough = cmark_find_syntax_extension("subscriptstrikethrough"),
+      guard let strikethrough = cmark_find_syntax_extension("strikethrough"),
             let node = cmark_node_new_with_ext(
-              ExtensionNodeTypes.shared.CMARK_NODE_SUBSCRIPTSTRIKETHROUGH, subscriptstrikethrough
+              ExtensionNodeTypes.shared.CMARK_NODE_STRIKETHROUGH, strikethrough
             )
       else {
         return nil
@@ -421,10 +417,9 @@ private extension UnsafeNode {
       children.compactMap(UnsafeNode.make).forEach { cmark_node_append_child(node, $0) }
       return node
     case .subscript(let content):
-      // TODO: Decide here
-      guard let subscriptstrikethrough = cmark_find_syntax_extension("subscriptstrikethrough"),
+      guard let `subscript` = cmark_find_syntax_extension("subscript"),
             let node = cmark_node_new_with_ext(
-              ExtensionNodeTypes.shared.CMARK_NODE_SUBSCRIPTSTRIKETHROUGH, subscriptstrikethrough
+              ExtensionNodeTypes.shared.CMARK_NODE_SUBSCRIPT, `subscript`
             )
       else {
         return nil
@@ -538,7 +533,8 @@ private struct ExtensionNodeTypes {
   let CMARK_NODE_TABLE: cmark_node_type
   let CMARK_NODE_TABLE_ROW: cmark_node_type
   let CMARK_NODE_TABLE_CELL: cmark_node_type
-  let CMARK_NODE_SUBSCRIPTSTRIKETHROUGH: cmark_node_type
+  let CMARK_NODE_SUBSCRIPT: cmark_node_type
+  let CMARK_NODE_STRIKETHROUGH: cmark_node_type
   let CMARK_NODE_SUPERSCRIPT: cmark_node_type
   let CMARK_NODE_HIGHLIGHT: cmark_node_type
 
@@ -558,10 +554,12 @@ private struct ExtensionNodeTypes {
     self.CMARK_NODE_TABLE_ROW = findNodeType("CMARK_NODE_TABLE_ROW", in: handle) ?? CMARK_NODE_NONE
     self.CMARK_NODE_TABLE_CELL =
       findNodeType("CMARK_NODE_TABLE_CELL", in: handle) ?? CMARK_NODE_NONE
-    self.CMARK_NODE_SUBSCRIPTSTRIKETHROUGH =
-      findNodeType("CMARK_NODE_SUBSCRIPTSTRIKETHROUGH", in: handle) ?? CMARK_NODE_NONE
+    self.CMARK_NODE_STRIKETHROUGH =
+      findNodeType("CMARK_NODE_STRIKETHROUGH", in: handle) ?? CMARK_NODE_NONE
     self.CMARK_NODE_SUPERSCRIPT =
       findNodeType("CMARK_NODE_SUPERSCRIPT", in: handle) ?? CMARK_NODE_NONE
+    self.CMARK_NODE_SUBSCRIPT =
+      findNodeType("CMARK_NODE_SUBSCRIPT", in: handle) ?? CMARK_NODE_NONE
     self.CMARK_NODE_HIGHLIGHT =
       findNodeType("CMARK_NODE_HIGHLIGHT", in: handle) ?? CMARK_NODE_NONE
     dlclose(handle)

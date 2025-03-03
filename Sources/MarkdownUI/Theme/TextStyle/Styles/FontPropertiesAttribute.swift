@@ -32,6 +32,8 @@ extension AttributedString {
       guard let fontProperties = run.fontProperties else {
         continue
       }
+      print(fontProperties.baselineOffset)
+      output[run.range].baselineOffset = fontProperties.baselineOffset
       output[run.range].font = .withProperties(fontProperties)
       output[run.range].fontProperties = nil
     }

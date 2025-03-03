@@ -1,6 +1,6 @@
 import SwiftUI
 
-extension Theme {
+public extension Theme {
   /// A theme that mimics the GitHub style.
   ///
   /// Style | Preview
@@ -14,7 +14,7 @@ extension Theme {
   /// Bulleted list | ![](GitHubNestedBulletedList)
   /// Numbered list | ![](GitHubNumberedList)
   /// Table | ![](GitHubTable)
-  public static let gitHub = Theme()
+  static let gitHub = Theme()
     .text {
       ForegroundColor(.text)
       BackgroundColor(.background)
@@ -30,6 +30,34 @@ extension Theme {
     }
     .link {
       ForegroundColor(.link)
+    }
+    .highlight {
+      BackgroundColor(.yellow)
+      ForegroundColor(.black)
+    }
+    .superscriptText {
+      FontSize(9)
+      BaselineOffset(6)
+    }
+    .subscriptText {
+      FontSize(9)
+      BaselineOffset(-4)
+    }
+    .subscript { configuration in
+      configuration.label
+        .offset(x: 0, y: 2)
+        .markdownTextStyle {
+          FontWeight(.semibold)
+          FontSize(.em(2))
+        }
+    }
+    .superscript { configuration in
+      configuration.label
+        .offset(x: 0, y: -2)
+        .markdownTextStyle {
+          FontWeight(.semibold)
+          FontSize(.em(2))
+        }
     }
     .heading1 { configuration in
       VStack(alignment: .leading, spacing: 0) {
@@ -166,31 +194,31 @@ extension Theme {
     }
 }
 
-extension Color {
-  fileprivate static let text = Color(
+private extension Color {
+  static let text = Color(
     light: Color(rgba: 0x0606_06ff), dark: Color(rgba: 0xfbfb_fcff)
   )
-  fileprivate static let secondaryText = Color(
+  static let secondaryText = Color(
     light: Color(rgba: 0x6b6e_7bff), dark: Color(rgba: 0x9294_a0ff)
   )
-  fileprivate static let tertiaryText = Color(
+  static let tertiaryText = Color(
     light: Color(rgba: 0x6b6e_7bff), dark: Color(rgba: 0x6d70_7dff)
   )
-  fileprivate static let background = Color(
+  static let background = Color(
     light: .white, dark: Color(rgba: 0x1819_1dff)
   )
-  fileprivate static let secondaryBackground = Color(
+  static let secondaryBackground = Color(
     light: Color(rgba: 0xf7f7_f9ff), dark: Color(rgba: 0x2526_2aff)
   )
-  fileprivate static let link = Color(
+  static let link = Color(
     light: Color(rgba: 0x2c65_cfff), dark: Color(rgba: 0x4c8e_f8ff)
   )
-  fileprivate static let border = Color(
+  static let border = Color(
     light: Color(rgba: 0xe4e4_e8ff), dark: Color(rgba: 0x4244_4eff)
   )
-  fileprivate static let divider = Color(
+  static let divider = Color(
     light: Color(rgba: 0xd0d0_d3ff), dark: Color(rgba: 0x3334_38ff)
   )
-  fileprivate static let checkbox = Color(rgba: 0xb9b9_bbff)
-  fileprivate static let checkboxBackground = Color(rgba: 0xeeee_efff)
+  static let checkbox = Color(rgba: 0xb9b9_bbff)
+  static let checkboxBackground = Color(rgba: 0xeeee_efff)
 }

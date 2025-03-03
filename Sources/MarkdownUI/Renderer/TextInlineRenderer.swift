@@ -107,15 +107,12 @@ private struct TextInlineRenderer {
   }
 
   private mutating func defaultRender(_ inline: InlineNode) {
-    self.result =
-      self.result
-      + Text(
-        inline.renderAttributedString(
-          baseURL: self.baseURL,
-          textStyles: self.textStyles,
-          softBreakMode: self.softBreakMode,
-          attributes: self.attributes
-        )
-      )
+    let inline = inline.renderAttributedString(
+      baseURL: self.baseURL,
+      textStyles: self.textStyles,
+      softBreakMode: self.softBreakMode,
+      attributes: self.attributes
+    )
+    self.result = self.result + Text(inline)
   }
 }

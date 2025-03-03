@@ -57,10 +57,10 @@ private struct AttributedStringInlineRenderer {
       self.renderStrong(children: children)
     case .strikethrough(let children):
       self.renderStrikethrough(children: children)
-    case .superscript(let content):
-      self.renderSuperscript(content)
-    case .subscript(let content):
-      self.renderSubscript(content)
+    case .superscript(let children):
+      self.renderSuperscript(children: children)
+    case .subscript(let children):
+      self.renderSubscript(children: children)
     case .highlight(let children):
       self.renderHighlight(children: children)
     case .link(let destination, let children):
@@ -145,10 +145,6 @@ private struct AttributedStringInlineRenderer {
     self.attributes = savedAttributes
   }
 
-  private mutating func renderSubscript(_ text: String) {
-    self.result += .init(text, attributes: self.textStyles.subscript.mergingAttributes(self.attributes))
-  }
-
   private mutating func renderHighlight(children: [InlineNode]) {
     let savedAttributes = self.attributes
     self.attributes = self.textStyles.highlight.mergingAttributes(self.attributes)
@@ -160,8 +156,26 @@ private struct AttributedStringInlineRenderer {
     self.attributes = savedAttributes
   }
 
-  private mutating func renderSuperscript(_ text: String) {
-    self.result += .init(text, attributes: self.textStyles.superscript.mergingAttributes(self.attributes))
+  private mutating func renderSubscript(children: [InlineNode]) {
+    let savedAttributes = self.attributes
+    self.attributes = self.textStyles.subscript.mergingAttributes(self.attributes)
+
+    for child in children {
+      self.render(child)
+    }
+
+    self.attributes = savedAttributes
+  }
+
+  private mutating func renderSuperscript(children: [InlineNode]) {
+    let savedAttributes = self.attributes
+    self.attributes = self.textStyles.superscript.mergingAttributes(self.attributes)
+
+    for child in children {
+      self.render(child)
+    }
+
+    self.attributes = savedAttributes
   }
 
   private mutating func renderLink(destination: String, children: [InlineNode]) {

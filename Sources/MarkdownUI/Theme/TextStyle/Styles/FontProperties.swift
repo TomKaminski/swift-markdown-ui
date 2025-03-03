@@ -77,6 +77,8 @@ public struct FontProperties: Hashable {
     #endif
   }
 
+  public var baselineOffset: CGFloat = 0
+
   /// The font family.
   public var family: Family = .system()
 
@@ -136,7 +138,8 @@ public struct FontProperties: Hashable {
     weight: Font.Weight = Self.defaultWeight,
     width: Font.Width,
     size: CGFloat = Self.defaultSize,
-    scale: CGFloat = 1
+    scale: CGFloat = 1,
+    yOffset: CGFloat = 0
   ) {
     self.init(
       family: family,
@@ -146,7 +149,8 @@ public struct FontProperties: Hashable {
       style: style,
       weight: weight,
       size: size,
-      scale: scale
+      scale: scale,
+      yOffset: yOffset
     )
     self.width = width
   }
@@ -169,7 +173,8 @@ public struct FontProperties: Hashable {
     style: FontProperties.Style = .normal,
     weight: Font.Weight = Self.defaultWeight,
     size: CGFloat = Self.defaultSize,
-    scale: CGFloat = 1
+    scale: CGFloat = 1,
+    yOffset: CGFloat = 0
   ) {
     self.family = family
     self.familyVariant = familyVariant
@@ -179,6 +184,7 @@ public struct FontProperties: Hashable {
     self.weight = weight
     self.size = size
     self.scale = scale
+    self.baselineOffset = yOffset
   }
 }
 

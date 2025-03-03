@@ -121,11 +121,6 @@ public struct Theme: Sendable {
   public var superscriptText: TextStyle = EmptyTextStyle()
   public var subscriptText: TextStyle = EmptyTextStyle()
 
-  /// The superscript style.
-  public var superscript = BlockStyle<BlockConfiguration> { $0.label }
-
-  public var `subscript` = BlockStyle<BlockConfiguration> { $0.label }
-
   public var highlight: TextStyle = BackgroundColor(.yellow)
 
   var headings = Array(
@@ -205,6 +200,10 @@ public struct Theme: Sendable {
   /// The thematic break style.
   public var thematicBreak = BlockStyle { Divider() }
 
+  public var superscript = BlockStyle<BlockConfiguration> { $0.label }
+
+  public var `subscript` = BlockStyle<BlockConfiguration> { $0.label }
+
   /// Creates a theme with default text styles.
   public init() {}
 }
@@ -250,6 +249,24 @@ public extension Theme {
     return theme
   }
 
+  func highlight<S: TextStyle>(@TextStyleBuilder highlight: () -> S) -> Theme {
+    var theme = self
+    theme.highlight = highlight()
+    return theme
+  }
+  
+  func superscriptText<S: TextStyle>(@TextStyleBuilder style: () -> S) -> Theme {
+    var theme = self
+    theme.superscriptText = style()
+    return theme
+  }
+  
+  func subscriptText<S: TextStyle>(@TextStyleBuilder style: () -> S) -> Theme {
+    var theme = self
+    theme.subscriptText = style()
+    return theme
+  }
+
   /// Adds a link style to the theme.
   /// - Parameter link: A text style builder that returns the link style.
   func link<S: TextStyle>(@TextStyleBuilder link: () -> S) -> Theme {
@@ -260,6 +277,22 @@ public extension Theme {
 }
 
 public extension Theme {
+  func superscript<Body: View>(
+    @ViewBuilder body: @escaping (_ configuration: BlockConfiguration) -> Body
+  ) -> Theme {
+    var theme = self
+    theme.superscript = .init(body: body)
+    return theme
+  }
+
+  func `subscript`<Body: View>(
+    @ViewBuilder body: @escaping (_ configuration: BlockConfiguration) -> Body
+  ) -> Theme {
+    var theme = self
+    theme.subscript = .init(body: body)
+    return theme
+  }
+
   /// Adds a level 1 heading style to the theme.
   /// - Parameter body: A view builder that returns a customized level 1 heading.
   func heading1<Body: View>(

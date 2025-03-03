@@ -226,7 +226,7 @@ public struct Markdown: View {
   }
 }
 
-extension Markdown {
+public extension Markdown {
   /// Creates a Markdown view from a Markdown-formatted string.
   /// - Parameters:
   ///   - markdown: The string that contains the Markdown formatting.
@@ -234,7 +234,7 @@ extension Markdown {
   ///              URLs absolute. The default is `nil`.
   ///   - imageBaseURL: The base URL to use when resolving Markdown image URLs. If this value is `nil`, the initializer will
   ///                   determine image URLs using the `baseURL` parameter. The default is `nil`.
-  public init(_ markdown: String, baseURL: URL? = nil, imageBaseURL: URL? = nil) {
+  init(_ markdown: String, baseURL: URL? = nil, imageBaseURL: URL? = nil) {
     self.init(MarkdownContent(markdown), baseURL: baseURL, imageBaseURL: imageBaseURL)
   }
 
@@ -275,7 +275,7 @@ extension Markdown {
   ///   - imageBaseURL: The base URL to use when resolving Markdown image URLs. If this value is `nil`, the initializer will
   ///                   determine image URLs using the `baseURL` parameter. The default is `nil`.
   ///   - content: A Markdown content builder that returns the blocks that form the Markdown content.
-  public init(
+  init(
     baseURL: URL? = nil,
     imageBaseURL: URL? = nil,
     @MarkdownContentBuilder content: () -> MarkdownContent
