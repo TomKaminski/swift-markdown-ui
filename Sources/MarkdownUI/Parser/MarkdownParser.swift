@@ -138,14 +138,25 @@ private extension InlineNode {
       self = .emphasis(children: unsafeNode.children.compactMap(InlineNode.init(unsafeNode:)))
     case .strong:
       self = .strong(children: unsafeNode.children.compactMap(InlineNode.init(unsafeNode:)))
-    case .strikethrough:
-      self = .strikethrough(children: unsafeNode.children.compactMap(InlineNode.init(unsafeNode:)))
     case .highlight:
       self = .highlight(children: unsafeNode.children.compactMap(InlineNode.init(unsafeNode:)))
     case .superscript:
       self = .superscript(children: unsafeNode.children.compactMap(InlineNode.init(unsafeNode:)))
-    case .subscript:
-      self = .subscript(children: unsafeNode.children.compactMap(InlineNode.init(unsafeNode:)))
+    case .subscriptstrikethrough:
+      if let userDataPointer = unsafeNode.pointee.user_data {
+        // Cast the user_data to a UnsafeMutableRawPointer containing a string
+        let userDataString = unsafeBitCast(userDataPointer, to: UnsafeMutablePointer<CChar>.self)
+        let userDataCString = String(cString: userDataString)
+
+        // Compare the string
+        if userDataCString == "subscript" {
+          self = .subscript(children: unsafeNode.children.compactMap(InlineNode.init(unsafeNode:)))
+        } else {
+          self = .strikethrough(children: unsafeNode.children.compactMap(InlineNode.init(unsafeNode:)))
+        }
+      } else {
+        self = .strikethrough(children: unsafeNode.children.compactMap(InlineNode.init(unsafeNode:)))
+      }
     case .link:
       self = .link(
         destination: unsafeNode.url ?? "",
@@ -241,9 +252,9 @@ private extension UnsafeNode {
     let extensionNames: Set<String>
 
     if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
-      extensionNames = ["autolink", "subscript", "tagfilter", "tasklist", "table", "highlight", "superscript", "strikethrough"]
+      extensionNames = ["autolink", "tagfilter", "tasklist", "table", "highlight", "superscript", "subscriptstrikethrough"]
     } else {
-      extensionNames = ["autolink", "subscript", "strikethrough", "superscript", "tagfilter", "tasklist"]
+      extensionNames = ["autolink", "subscriptstrikethrough", "superscript", "tagfilter", "tasklist"]
     }
 
     for extensionName in extensionNames {
@@ -406,9 +417,9 @@ private extension UnsafeNode {
       children.compactMap(UnsafeNode.make).forEach { cmark_node_append_child(node, $0) }
       return node
     case .strikethrough(let children):
-      guard let strikethrough = cmark_find_syntax_extension("strikethrough"),
+      guard let strikethrough = cmark_find_syntax_extension("subscriptstrikethrough"),
             let node = cmark_node_new_with_ext(
-              ExtensionNodeTypes.shared.CMARK_NODE_STRIKETHROUGH, strikethrough
+              ExtensionNodeTypes.shared.CMARK_NODE_SUBSCRIPTSTRIKETHROUGH, strikethrough
             )
       else {
         return nil
@@ -416,16 +427,16 @@ private extension UnsafeNode {
 
       children.compactMap(UnsafeNode.make).forEach { cmark_node_append_child(node, $0) }
       return node
-    case .subscript(let content):
-      guard let `subscript` = cmark_find_syntax_extension("subscript"),
+    case .subscript(let children):
+      guard let `subscript` = cmark_find_syntax_extension("subscriptstrikethrough"),
             let node = cmark_node_new_with_ext(
-              ExtensionNodeTypes.shared.CMARK_NODE_SUBSCRIPT, `subscript`
+              ExtensionNodeTypes.shared.CMARK_NODE_SUBSCRIPTSTRIKETHROUGH, `subscript`
             )
       else {
         return nil
       }
 
-      cmark_node_set_literal(node, content)
+      children.compactMap(UnsafeNode.make).forEach { cmark_node_append_child(node, $0) }
       return node
     case .highlight(let children):
       guard let highlight = cmark_find_syntax_extension("highlight"),
@@ -438,7 +449,7 @@ private extension UnsafeNode {
 
       children.compactMap(UnsafeNode.make).forEach { cmark_node_append_child(node, $0) }
       return node
-    case .superscript(let content):
+    case .superscript(let children):
       guard let superscript = cmark_find_syntax_extension("superscript"),
             let node = cmark_node_new_with_ext(
               ExtensionNodeTypes.shared.CMARK_NODE_SUPERSCRIPT, superscript
@@ -447,7 +458,7 @@ private extension UnsafeNode {
         return nil
       }
 
-      cmark_node_set_literal(node, content)
+      children.compactMap(UnsafeNode.make).forEach { cmark_node_append_child(node, $0) }
       return node
     case .link(let destination, let children):
       guard let node = cmark_node_new(CMARK_NODE_LINK) else { return nil }
@@ -491,9 +502,8 @@ private enum NodeType: String {
   // Extensions
 
   case superscript
-  case `subscript`
   case highlight
-  case strikethrough
+  case subscriptstrikethrough
   case table
   case tableHead = "table_header"
   case tableRow = "table_row"
@@ -533,8 +543,7 @@ private struct ExtensionNodeTypes {
   let CMARK_NODE_TABLE: cmark_node_type
   let CMARK_NODE_TABLE_ROW: cmark_node_type
   let CMARK_NODE_TABLE_CELL: cmark_node_type
-  let CMARK_NODE_SUBSCRIPT: cmark_node_type
-  let CMARK_NODE_STRIKETHROUGH: cmark_node_type
+  let CMARK_NODE_SUBSCRIPTSTRIKETHROUGH: cmark_node_type
   let CMARK_NODE_SUPERSCRIPT: cmark_node_type
   let CMARK_NODE_HIGHLIGHT: cmark_node_type
 
@@ -554,12 +563,10 @@ private struct ExtensionNodeTypes {
     self.CMARK_NODE_TABLE_ROW = findNodeType("CMARK_NODE_TABLE_ROW", in: handle) ?? CMARK_NODE_NONE
     self.CMARK_NODE_TABLE_CELL =
       findNodeType("CMARK_NODE_TABLE_CELL", in: handle) ?? CMARK_NODE_NONE
-    self.CMARK_NODE_STRIKETHROUGH =
-      findNodeType("CMARK_NODE_STRIKETHROUGH", in: handle) ?? CMARK_NODE_NONE
+    self.CMARK_NODE_SUBSCRIPTSTRIKETHROUGH =
+      findNodeType("CMARK_NODE_SUBSCRIPTSTRIKETHROUGH", in: handle) ?? CMARK_NODE_NONE
     self.CMARK_NODE_SUPERSCRIPT =
       findNodeType("CMARK_NODE_SUPERSCRIPT", in: handle) ?? CMARK_NODE_NONE
-    self.CMARK_NODE_SUBSCRIPT =
-      findNodeType("CMARK_NODE_SUBSCRIPT", in: handle) ?? CMARK_NODE_NONE
     self.CMARK_NODE_HIGHLIGHT =
       findNodeType("CMARK_NODE_HIGHLIGHT", in: handle) ?? CMARK_NODE_NONE
     dlclose(handle)

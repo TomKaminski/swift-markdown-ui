@@ -1,6 +1,6 @@
 public struct Subscript: InlineContentProtocol {
   public var _inlineContent: InlineContent {
-    .init(inlines: [.subscript(children: self.content.inlines)])
+    .init(inlines: [.subscript(children: content.inlines)])
   }
 
   private let content: InlineContent
@@ -12,6 +12,7 @@ public struct Subscript: InlineContentProtocol {
   public init(_ text: String) {
     self.init(content: .init(inlines: [.text(text)]))
   }
+
   public init(@InlineContentBuilder content: () -> InlineContent) {
     self.init(content: content())
   }
